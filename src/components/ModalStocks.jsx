@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Modal, Button, Container, Col, Row } from "react-bootstrap"; // Assuming you're using Bootstrap
+import "./Styles.css";
 
 const ModalStocks = ({ show, handleClose, portfolio, postStock }) => {
   const [selectedStock, setSelectedStock] = useState("");
@@ -7,12 +8,18 @@ const ModalStocks = ({ show, handleClose, portfolio, postStock }) => {
   const [newStock, setNewStock] = useState("");
   const [newStockName, setNewStockName] = useState("");
   const [newStockQuantity, setNewStockQuantity] = useState(0);
+  const [response, setResponse] = useState(null);
+  const [showMessage, setShowMessage] = useState(false);
+  const [stockId, setStockId] = useState(null);
 
+  console.log(portfolio);
   const handleStockChange = (event) => {
     const selectedSymbol = event.target.value;
+    console.log("event", event.target.value);
     if (selectedSymbol && portfolio[selectedSymbol]) {
       setSelectedStock(selectedSymbol);
       setQuantity(portfolio[selectedSymbol].quantity);
+      setStockId(portfolio[selectedSymbol].stock_id);
       setNewStock("");
     } else if (selectedSymbol === "8") {
       setSelectedStock("");
@@ -26,48 +33,93 @@ const ModalStocks = ({ show, handleClose, portfolio, postStock }) => {
   };
 
   const handleNewStockQuantityChange = (event) => {
-    setNewStockQuantity(event.target.value);
+    const quantityInput = event.target.value;
+    if (/^\d+$/.test(quantityInput) && parseInt(quantityInput) > 0) {
+      setNewStockQuantity(quantityInput);
+    } else {
+      setResponse("Quantity must be a positive integer");
+      setNewStockQuantity(0);
+    }
+  };
+
+  const handleQuantityChange = (event) => {
+    const quantityInput = event.target.value;
+    if (/^\d+$/.test(quantityInput) && parseInt(quantityInput) > 0) {
+      setQuantity(quantityInput);
+    } else {
+      setResponse("Quantity must be a positive integer");
+      setQuantity(0);
+    }
   };
 
   const handleNewStockNameChange = (event) => {
     setNewStockName(event.target.value);
   };
 
-  const handleQuantityChange = (event) => {
-    setQuantity(event.target.value);
-  };
-
   const handleSubmit = async () => {
-    console.log("New Stock Name:", newStockName, newStockQuantity);
     if (newStock) {
+      console.log("new stock", newStock);
       const createStock = {
         action: "create",
         newStockName,
         newStockQuantity,
+        stockId,
       };
-      await postStock(createStock);
+      const upperNameStock = createStock.newStockName.toUpperCase();
+      let stockExist = false;
+      for (const stockName in portfolio) {
+        if (upperNameStock === stockName) {
+          stockExist = true;
+          break;
+        }
+      }
+      if (stockExist === false) {
+        let responseData = await postStock(createStock);
+        setResponse(responseData);
+      } else {
+        setResponse(
+          `Stock ${createStock.newStockName} is already in the portfolio`
+        );
+      }
     } else {
-      console.log("Selected Stock:", selectedStock, quantity);
       const modifyStock = {
         action: "modify",
         selectedStock,
         quantity,
+        stockId,
       };
-      await postStock(modifyStock);
+      console.log("mody:", modifyStock);
+      let responseData = await postStock(modifyStock);
+      console.log(responseData);
+      setResponse(responseData);
     }
-    handleClose();
   };
 
   const handleDelete = async () => {
-    console.log("New delete Name:", newStockName, newStockQuantity);
     const modifyStock = {
       action: "delete",
       selectedStock,
       quantity,
+      stockId,
     };
-    await postStock(modifyStock);
+    console.log("delete:", modifyStock);
+    let responseData = await postStock(modifyStock);
+    setResponse(responseData);
+    setSelectedStock("");
     handleClose();
   };
+
+  useEffect(() => {
+    console.log("in use effect", response);
+    if (response) {
+      setShowMessage(true);
+      const timer = setTimeout(() => {
+        setShowMessage(false);
+      }, 5000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [response]);
 
   return (
     <Modal show={show} onHide={handleClose}>
@@ -85,7 +137,9 @@ const ModalStocks = ({ show, handleClose, portfolio, postStock }) => {
             defaultValue="" // No pre-selected option
             onChange={handleStockChange} // Your handler function
           >
-            <option value=""></option> {/* Placeholder option for clarity */}
+            <option value="" disabled>
+              Select the options
+            </option>{" "}
             <option value="8">--Add new stock--</option>
             {Object.entries(portfolio)
               .filter(([symbol]) => symbol !== "portfolio_value")
@@ -138,6 +192,17 @@ const ModalStocks = ({ show, handleClose, portfolio, postStock }) => {
       </Modal.Body>
 
       <Modal.Footer>
+        <div>
+          {showMessage && (
+            <div className={response.error_code === 200 ? "success" : "error"}>
+              {response.error_code && response.message ? (
+                <p>{response.message}</p>
+              ) : (
+                <p>{response}</p>
+              )}
+            </div>
+          )}
+        </div>
         {selectedStock && !newStock && (
           <Button variant="danger" onClick={handleDelete}>
             Delete

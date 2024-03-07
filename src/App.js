@@ -7,7 +7,8 @@ function App() {
   const [details, setDetails] = useState([]);
   const [ticker, setSymbol] = useState(null);
   const [search, setSearch] = useState({});
-  const [reducerValue, forceUpdate] = useReducer((x) => x + 1, 0);
+  const [update, setUpdate] = useState(null);
+  //const [reducerValue, forceUpdate] = useReducer((x) => x + 1, 0);
 
   // Function to fetch data from the API
   const fetchData = async () => {
@@ -24,7 +25,7 @@ function App() {
 
   useEffect(() => {
     fetchData();
-  }, [reducerValue]);
+  }, [update]);
 
   const handleDetailsClick = async (symbol) => {
     try {
@@ -54,8 +55,6 @@ function App() {
   };
 
   async function modifyStockPost(modProp) {
-    console.log("Receivng the post", JSON.stringify(modProp));
-
     try {
       const response = await fetch(
         "https://itrulle-mcsbt-integration.ew.r.appspot.com/edit_stock",
@@ -69,11 +68,16 @@ function App() {
         }
       );
       const responseData = await response.json();
-      console.log(responseData);
+      setUpdate(responseData);
+      return responseData;
     } catch (error) {
       console.error("Error sending POST request:", error);
+      return {
+        error_code: 500,
+        message: "An error occurred editing the stocks",
+      };
     }
-    forceUpdate();
+    //forceUpdate();
   }
 
   return (
