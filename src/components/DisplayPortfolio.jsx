@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Container, Col, Row, InputGroup, FormControl } from "react-bootstrap";
-import { Accordion, Card, Button } from "react-bootstrap";
+import { Accordion, Button } from "react-bootstrap";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
 import Spinner from "react-bootstrap/Spinner";
-import ModalStocks from "./ModalStocks";
 
 function DisplayPortfolio({
   data,
@@ -11,7 +10,8 @@ function DisplayPortfolio({
   handleDetailsClick,
   searchSymbol,
   search,
-  postStock,
+  setShowModal,
+  setLoggedIn,
 }) {
   const [loadingComp, setLoadingComp] = useState(true);
   const [loading, setLoading] = useState(false);
@@ -19,7 +19,6 @@ function DisplayPortfolio({
   const [activeKey, setActiveKey] = useState(null); // Track the active accordion - Here i know the state
   const [searchItem, setSearchItem] = useState("");
   const [searchResults, setSearchResults] = useState({});
-  const [showModal, setShowModal] = useState(false);
   const [displayData, setDisplayData] = useState(data);
   const [sortedDetails, setSortedDetails] = useState([]);
 
@@ -94,12 +93,19 @@ function DisplayPortfolio({
     setShowModal(true);
   };
 
-  const handleCloseModal = () => {
-    setShowModal(false);
+  const signOut = () => {
+    setLoggedIn(false);
+    localStorage.removeItem("isLoggedIn");
+    localStorage.removeItem("userId");
   };
 
   return (
     <div className="App" style={{ marginTop: "30px" }}>
+      <Col className="d-flex justify-content-center">
+        <Button variant="secondary" onClick={signOut}>
+          Sign Out
+        </Button>
+      </Col>
       <Container className="mb-4">
         <h1>Stock Tracker</h1>
         <Button variant="primary" onClick={handleShowModal}>
@@ -241,14 +247,6 @@ function DisplayPortfolio({
                 </Col>
               </Container>
             ))}
-          {showModal && (
-            <ModalStocks
-              show={showModal}
-              handleClose={handleCloseModal}
-              portfolio={displayData}
-              postStock={postStock}
-            />
-          )}
         </div>
       ) : (
         <p></p>

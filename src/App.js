@@ -1,5 +1,8 @@
 import React, { useState, useEffect, useReducer } from "react";
 import DisplayPortfolio from "./components/DisplayPortfolio";
+import Login from "./components/Login";
+import SignUp from "./components/SignUp";
+import ModalStocks from "./components/ModalStocks";
 
 function App() {
   // State to store the fetched data
@@ -8,30 +11,32 @@ function App() {
   const [ticker, setSymbol] = useState(null);
   const [search, setSearch] = useState({});
   const [update, setUpdate] = useState(null);
+  const [loggedIn, setLoggedIn] = useState(false);
+  const [showSignUp, setShowSignUp] = useState(false);
+  const [userId, setUserId] = useState("");
+  const [showModal, setShowModal] = useState(false);
   //const [reducerValue, forceUpdate] = useReducer((x) => x + 1, 0);
 
   // Function to fetch data from the API
-  const fetchData = async () => {
+  async function fetchData(userId) {
     try {
-      const response = await fetch(
-        "https://itrulle-mcsbt-integration.ew.r.appspot.com/"
-      );
+      const response = await fetch(`http://127.0.0.1:5000/${userId}`);
       const jsonData = await response.json();
       setData(jsonData);
     } catch (error) {
       console.error("Error fetching data: ", error);
     }
-  };
+  }
 
   useEffect(() => {
-    fetchData();
-  }, [update]);
+    if (loggedIn) {
+      fetchData(userId); // Fetch data only when logged in
+    }
+  }, [update, userId]);
 
   const handleDetailsClick = async (symbol) => {
     try {
-      const response = await fetch(
-        `https://itrulle-mcsbt-integration.ew.r.appspot.com/${symbol}`
-      );
+      const response = await fetch(`http://127.0.0.1:5000/ticker/${symbol}`);
       const jsonData = await response.json();
       setDetails(jsonData);
       setSymbol(symbol);
@@ -42,13 +47,9 @@ function App() {
 
   const searchSymbol = async (symbol) => {
     try {
-      console.log("in the app", symbol);
-      const response = await fetch(
-        `https://itrulle-mcsbt-integration.ew.r.appspot.com/search/${symbol}`
-      );
+      const response = await fetch(`http://127.0.0.1:5000/search/${symbol}`);
       const jsonData = await response.json();
       setSearch(jsonData);
-      console.log("in the app", jsonData);
     } catch (error) {
       console.error("Error fetching data: ", error);
     }
@@ -56,17 +57,18 @@ function App() {
 
   async function modifyStockPost(modProp) {
     try {
-      const response = await fetch(
-        "https://itrulle-mcsbt-integration.ew.r.appspot.com/edit_stock",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Referrer-Policy": "origin-when-cross-origin",
-          },
-          body: JSON.stringify(modProp),
-        }
-      );
+      const modifiedProperties = {
+        ...modProp,
+        userId: userId, // Assuming userId is accessible in this scope
+      };
+      const response = await fetch("http://127.0.0.1:5000/edit_stock", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Referrer-Policy": "origin-when-cross-origin",
+        },
+        body: JSON.stringify(modifiedProperties),
+      });
       const responseData = await response.json();
       setUpdate(responseData);
       return responseData;
@@ -80,16 +82,75 @@ function App() {
     //forceUpdate();
   }
 
+  async function fetchLogin(userLogin) {
+    try {
+      const response = await fetch("http://127.0.0.1:5000/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Referrer-Policy": "origin-when-cross-origin",
+        },
+        body: JSON.stringify(userLogin),
+      });
+      const responseData = await response.json();
+      setUpdate(responseData);
+      setUserId(userLogin.userId);
+      return responseData;
+    } catch (error) {
+      console.error("Error sending POST request:", error);
+      return {
+        error_code: 500,
+        message: "An error occurred in the login",
+      };
+    }
+    //forceUpdate();
+  }
+
+  useEffect(() => {
+    const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
+    const userId = localStorage.getItem("userId");
+    if (isLoggedIn && userId) {
+      setLoggedIn(true);
+      setUserId(userId);
+    }
+  }, []);
+
   return (
     <div className="App">
-      <DisplayPortfolio
-        data={data}
-        details={details}
-        handleDetailsClick={handleDetailsClick}
-        searchSymbol={searchSymbol}
-        search={search}
-        postStock={modifyStockPost}
-      />
+      {loggedIn ? (
+        <>
+          <DisplayPortfolio
+            data={data}
+            details={details}
+            handleDetailsClick={handleDetailsClick}
+            searchSymbol={searchSymbol}
+            search={search}
+            postStock={modifyStockPost}
+            setShowModal={setShowModal}
+            setLoggedIn={setLoggedIn}
+          />
+          {showModal && (
+            <ModalStocks
+              postStock={modifyStockPost}
+              setShowModal={setShowModal}
+              show={showModal}
+              portfolio={data}
+            />
+          )}
+        </>
+      ) : showSignUp ? (
+        <SignUp
+          fetchLogin={fetchLogin}
+          setLoggedIn={setLoggedIn}
+          setShowSignUp={setShowSignUp}
+        />
+      ) : (
+        <Login
+          fetchLogin={fetchLogin}
+          setLoggedIn={setLoggedIn}
+          setShowSignUp={setShowSignUp}
+        />
+      )}
     </div>
   );
 }

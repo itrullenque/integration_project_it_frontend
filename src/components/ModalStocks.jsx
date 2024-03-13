@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { Modal, Button, Container, Col, Row } from "react-bootstrap"; // Assuming you're using Bootstrap
+import { Modal, Button, Container, Col, Row } from "react-bootstrap";
 import "./Styles.css";
 
-const ModalStocks = ({ show, handleClose, portfolio, postStock }) => {
+const ModalStocks = ({ postStock, setShowModal, show, portfolio }) => {
   const [selectedStock, setSelectedStock] = useState("");
   const [quantity, setQuantity] = useState(0);
   const [newStock, setNewStock] = useState("");
@@ -12,10 +12,8 @@ const ModalStocks = ({ show, handleClose, portfolio, postStock }) => {
   const [showMessage, setShowMessage] = useState(false);
   const [stockId, setStockId] = useState(null);
 
-  console.log(portfolio);
   const handleStockChange = (event) => {
     const selectedSymbol = event.target.value;
-    console.log("event", event.target.value);
     if (selectedSymbol && portfolio[selectedSymbol]) {
       setSelectedStock(selectedSymbol);
       setQuantity(portfolio[selectedSymbol].quantity);
@@ -58,7 +56,6 @@ const ModalStocks = ({ show, handleClose, portfolio, postStock }) => {
 
   const handleSubmit = async () => {
     if (newStock) {
-      console.log("new stock", newStock);
       const createStock = {
         action: "create",
         newStockName,
@@ -88,9 +85,7 @@ const ModalStocks = ({ show, handleClose, portfolio, postStock }) => {
         quantity,
         stockId,
       };
-      console.log("mody:", modifyStock);
       let responseData = await postStock(modifyStock);
-      console.log(responseData);
       setResponse(responseData);
     }
   };
@@ -102,15 +97,13 @@ const ModalStocks = ({ show, handleClose, portfolio, postStock }) => {
       quantity,
       stockId,
     };
-    console.log("delete:", modifyStock);
     let responseData = await postStock(modifyStock);
     setResponse(responseData);
     setSelectedStock("");
-    handleClose();
+    handleCloseModal();
   };
 
   useEffect(() => {
-    console.log("in use effect", response);
     if (response) {
       setShowMessage(true);
       const timer = setTimeout(() => {
@@ -121,8 +114,12 @@ const ModalStocks = ({ show, handleClose, portfolio, postStock }) => {
     }
   }, [response]);
 
+  const handleCloseModal = () => {
+    setShowModal(false);
+  };
+
   return (
-    <Modal show={show} onHide={handleClose}>
+    <Modal show={show} onHide={handleCloseModal}>
       <Modal.Header closeButton>
         <Modal.Title>Stock Details</Modal.Title>
       </Modal.Header>
