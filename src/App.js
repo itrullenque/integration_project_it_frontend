@@ -20,7 +20,9 @@ function App() {
   // Function to fetch data from the API
   async function fetchData(userId) {
     try {
-      const response = await fetch(`http://127.0.0.1:5000/${userId}`);
+      const response = await fetch(
+        `https://itrulle-mcsbt-integration.ew.r.appspot.com/${userId}`
+      );
       const jsonData = await response.json();
       setData(jsonData);
     } catch (error) {
@@ -36,7 +38,9 @@ function App() {
 
   const handleDetailsClick = async (symbol) => {
     try {
-      const response = await fetch(`http://127.0.0.1:5000/ticker/${symbol}`);
+      const response = await fetch(
+        `https://itrulle-mcsbt-integration.ew.r.appspot.com/ticker/${symbol}`
+      );
       const jsonData = await response.json();
       setDetails(jsonData);
       setSymbol(symbol);
@@ -47,7 +51,9 @@ function App() {
 
   const searchSymbol = async (symbol) => {
     try {
-      const response = await fetch(`http://127.0.0.1:5000/search/${symbol}`);
+      const response = await fetch(
+        `https://itrulle-mcsbt-integration.ew.r.appspot.com/search/${symbol}`
+      );
       const jsonData = await response.json();
       setSearch(jsonData);
     } catch (error) {
@@ -61,14 +67,17 @@ function App() {
         ...modProp,
         userId: userId, // Assuming userId is accessible in this scope
       };
-      const response = await fetch("http://127.0.0.1:5000/edit_stock", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Referrer-Policy": "origin-when-cross-origin",
-        },
-        body: JSON.stringify(modifiedProperties),
-      });
+      const response = await fetch(
+        "https://itrulle-mcsbt-integration.ew.r.appspot.com/edit_stock",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Referrer-Policy": "origin-when-cross-origin",
+          },
+          body: JSON.stringify(modifiedProperties),
+        }
+      );
       const responseData = await response.json();
       setUpdate(responseData);
       return responseData;
@@ -84,14 +93,17 @@ function App() {
 
   async function fetchLogin(userLogin) {
     try {
-      const response = await fetch("http://127.0.0.1:5000/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Referrer-Policy": "origin-when-cross-origin",
-        },
-        body: JSON.stringify(userLogin),
-      });
+      const response = await fetch(
+        "https://itrulle-mcsbt-integration.ew.r.appspot.com/login",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Referrer-Policy": "origin-when-cross-origin",
+          },
+          body: JSON.stringify(userLogin),
+        }
+      );
       const responseData = await response.json();
       setUpdate(responseData);
       setUserId(userLogin.userId);
@@ -128,6 +140,7 @@ function App() {
             postStock={modifyStockPost}
             setShowModal={setShowModal}
             setLoggedIn={setLoggedIn}
+            setShowSignUp={setShowSignUp}
           />
           {showModal && (
             <ModalStocks

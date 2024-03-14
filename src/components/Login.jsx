@@ -4,9 +4,11 @@ import { Form, Button, Container, Col } from "react-bootstrap";
 function Login({ fetchLogin, setLoggedIn, setShowSignUp }) {
   const [userId, setUserId] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
     const loginDict = {
       userId: userId,
       password: password,
@@ -20,6 +22,7 @@ function Login({ fetchLogin, setLoggedIn, setShowSignUp }) {
     } else {
       console.log("no info for the user");
     }
+    setLoading(false);
   };
 
   const handleSignUp = async (e) => {
@@ -37,6 +40,7 @@ function Login({ fetchLogin, setLoggedIn, setShowSignUp }) {
               placeholder="Enter username"
               value={userId}
               onChange={(e) => setUserId(e.target.value)}
+              disabled={loading}
             />
           </Form.Group>
           <Form.Group className="mb-1" controlId="formBasicPassword">
@@ -45,12 +49,13 @@ function Login({ fetchLogin, setLoggedIn, setShowSignUp }) {
               placeholder="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              disabled={loading}
             />
           </Form.Group>
-          <Button variant="primary" type="submit">
-            Login
+          <Button variant="primary" type="submit" disabled={loading}>
+            {loading ? "Loading..." : "Login"}
           </Button>{" "}
-          <Button variant="secondary" onClick={handleSignUp}>
+          <Button variant="secondary" onClick={handleSignUp} disabled={loading}>
             Sign Up
           </Button>{" "}
         </Form>

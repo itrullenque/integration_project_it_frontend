@@ -6,9 +6,11 @@ function SignUp({ fetchLogin, setLoggedIn, setShowSignUp }) {
   const [password, setPassword] = useState("");
   const [userName, setUserName] = useState("");
   const [userMail, setUserMail] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
     const signInData = {
       userId: userId,
       password: password,
@@ -22,6 +24,7 @@ function SignUp({ fetchLogin, setLoggedIn, setShowSignUp }) {
     } else {
       console.log("Invalid credentials");
     }
+    setLoading(false);
   };
 
   const handleShowSignUp = () => {
@@ -39,6 +42,7 @@ function SignUp({ fetchLogin, setLoggedIn, setShowSignUp }) {
               placeholder="Enter user Id"
               value={userId}
               onChange={(e) => setUserId(e.target.value)}
+              disabled={loading}
             />
           </Form.Group>
           <Form.Group className="mb-1" controlId="formBasicPassword">
@@ -47,6 +51,7 @@ function SignUp({ fetchLogin, setLoggedIn, setShowSignUp }) {
               placeholder="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              disabled={loading}
             />
           </Form.Group>
           <Form.Group className="mb-1" controlId="formBasicUserName">
@@ -55,6 +60,7 @@ function SignUp({ fetchLogin, setLoggedIn, setShowSignUp }) {
               placeholder="Enter user name"
               value={userName}
               onChange={(e) => setUserName(e.target.value)}
+              disabled={loading}
             />
           </Form.Group>
           <Form.Group className="mb-1" controlId="formBasicUserMail">
@@ -63,12 +69,17 @@ function SignUp({ fetchLogin, setLoggedIn, setShowSignUp }) {
               placeholder="Enter user mail"
               value={userMail}
               onChange={(e) => setUserMail(e.target.value)}
+              disabled={loading}
             />
           </Form.Group>
-          <Button variant="primary" type="submit">
-            Sign Up
+          <Button variant="primary" type="submit" disabled={loading}>
+            {loading ? "Sign Up..." : "Sign Up"}
           </Button>{" "}
-          <Button variant="secondary" onClick={handleShowSignUp}>
+          <Button
+            variant="secondary"
+            onClick={handleShowSignUp}
+            disabled={loading}
+          >
             Back
           </Button>
         </Form>

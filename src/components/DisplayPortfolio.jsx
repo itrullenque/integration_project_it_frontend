@@ -12,6 +12,7 @@ function DisplayPortfolio({
   search,
   setShowModal,
   setLoggedIn,
+  setShowSignUp,
 }) {
   const [loadingComp, setLoadingComp] = useState(true);
   const [loading, setLoading] = useState(false);
@@ -97,6 +98,8 @@ function DisplayPortfolio({
     setLoggedIn(false);
     localStorage.removeItem("isLoggedIn");
     localStorage.removeItem("userId");
+    setDisplayData({});
+    setShowSignUp(false);
   };
 
   return (
