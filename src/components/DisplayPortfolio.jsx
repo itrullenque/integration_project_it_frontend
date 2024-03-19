@@ -3,6 +3,7 @@ import { Container, Col, Row, InputGroup, FormControl } from "react-bootstrap";
 import { Accordion, Button } from "react-bootstrap";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
 import Spinner from "react-bootstrap/Spinner";
+import StockGraph from "./StockGraph";
 
 function DisplayPortfolio({
   data,
@@ -100,6 +101,25 @@ function DisplayPortfolio({
     localStorage.removeItem("userId");
     setDisplayData({});
     setShowSignUp(false);
+  };
+
+  const prepareChartData = (sortedDetails) => {
+    const labels = Object.keys(sortedDetails).reverse();
+    const data = Object.values(sortedDetails)
+      .map((detail) => detail["4. close"])
+      .reverse();
+
+    return {
+      labels,
+      datasets: [
+        {
+          label: "Close Price",
+          data,
+          borderColor: "rgb(54, 162, 235)", // Solid blue for the line
+          backgroundColor: "rgba(54, 162, 235, 0.2)", // Light, semi-transparent blue for the area fill
+        },
+      ],
+    };
   };
 
   return (
@@ -217,32 +237,9 @@ function DisplayPortfolio({
                             <span className="visually-hidden">Loading...</span>
                           </Spinner>
                         ) : (
-                          <table className="table">
-                            <thead>
-                              <tr>
-                                <th scope="col">Date</th>
-                                <th scope="col">Open</th>
-                                <th scope="col">High</th>
-                                <th scope="col">Low</th>
-                                <th scope="col">Close</th>
-                                <th scope="col">Volume</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {Object.entries(sortedDetails).map(
-                                ([date, value], index) => (
-                                  <tr key={index}>
-                                    <td>{date}</td>
-                                    <td>{value["1. open"]}</td>
-                                    <td>{value["2. high"]}</td>
-                                    <td>{value["3. low"]}</td>
-                                    <td>{value["4. close"]}</td>
-                                    <td>{value["5. volume"]}</td>
-                                  </tr>
-                                )
-                              )}
-                            </tbody>
-                          </table>
+                          <StockGraph
+                            chartData={prepareChartData(sortedDetails)}
+                          />
                         )}
                       </Accordion.Body>
                     </Accordion.Item>
