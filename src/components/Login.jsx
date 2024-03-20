@@ -14,7 +14,6 @@ function Login({ fetchLogin, setLoggedIn, setShowSignUp }) {
       password: password,
     };
     const response = await fetchLogin(loginDict);
-    // Check if the response indicates successful login
     if (response && response.error_code === 200) {
       setLoggedIn(true);
       localStorage.setItem("isLoggedIn", "true");

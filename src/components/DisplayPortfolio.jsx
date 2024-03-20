@@ -14,6 +14,7 @@ function DisplayPortfolio({
   setShowModal,
   setLoggedIn,
   setShowSignUp,
+  fetchLogout,
 }) {
   const [loadingComp, setLoadingComp] = useState(true);
   const [loading, setLoading] = useState(false);
@@ -101,6 +102,7 @@ function DisplayPortfolio({
     localStorage.removeItem("userId");
     setDisplayData({});
     setShowSignUp(false);
+    fetchLogout();
   };
 
   const prepareChartData = (sortedDetails) => {
@@ -115,8 +117,8 @@ function DisplayPortfolio({
         {
           label: "Close Price",
           data,
-          borderColor: "rgb(54, 162, 235)", // Solid blue for the line
-          backgroundColor: "rgba(54, 162, 235, 0.2)", // Light, semi-transparent blue for the area fill
+          borderColor: "rgb(54, 162, 235)",
+          backgroundColor: "rgba(54, 162, 235, 0.2)",
         },
       ],
     };
