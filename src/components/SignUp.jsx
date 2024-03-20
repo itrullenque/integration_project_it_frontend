@@ -21,6 +21,8 @@ function SignUp({ fetchLogin, setLoggedIn, setShowSignUp }) {
     // Check if the response indicates successful login
     if (response && response.error_code === 200) {
       setLoggedIn(true);
+      localStorage.setItem("isLoggedIn", "true");
+      localStorage.setItem("userId", userId);
     } else {
       console.log("Invalid credentials");
     }
